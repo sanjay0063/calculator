@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+      /* Calculator Styles */
+
+/* Calculator Container */
+.calculator {
+  display: inline-block;
+  background-color: #f7f7f7;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Display */
+.display {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 1.5em;
+  text-align: right;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Keypad */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+/* Buttons */
+.key {
+  padding: 10px;
+  font-size: 1.2em;
+  text-align: center;
+  color: #fff;
+  background-color: #555;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Operator Buttons */
+.key.operator {
+  background-color: #888;
+}
+
+/* Hover Effects */
+.key:hover {
+  background-color: #333;
+}
+
+/* Active Effects */
+.key:active {
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Accessibility */
+/* Increase Contrast */
+.calculator,
+.key {
+  outline: none;
+}
+
+.calculator:focus,
+.key:focus {
+  outline: 2px solid #4d90fe;
+}
+
+.calculator:focus .key {
+  background-color: #4d90fe;
+}
+
+.calculator:focus .key.operator {
+  background-color: #7db9e8;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .key {
+    font-size: 1em;
+    padding: 5px;
+  }
+
+  .keypad {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+    </style>
+    <link rel="stylesheet" href="../css/calc.css">
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" class="display" id="display" readonly>
+        <div class="keypad">
+            <button class="key operator" onclick="handleOperator('clear')">C</button>
+            <button class="key operator" onclick="handleOperator('backspace')">&larr;</button>
+            <button class="key operator" onclick="handleOperator('%')">%</button>
+            <button class="key operator" onclick="handleOperator('/')">&divide;</button>
+            <button class="key" onclick="handleNumber('7')">7</button>
+            <button class="key" onclick="handleNumber('8')">8</button>
+            <button class="key" onclick="handleNumber('9')">9</button>
+            <button class="key operator" onclick="handleOperator('*')">&times;</button>
+            <button class="key" onclick="handleNumber('4')">4</button>
+            <button class="key" onclick="handleNumber('5')">5</button>
+            <button class="key" onclick="handleNumber('6')">6</button>
+            <button class="key operator" onclick="handleOperator('-')">&minus;</button>
+            <button class="key" onclick="handleNumber('1')">1</button>
+            <button class="key" onclick="handleNumber('2')">2</button>
+            <button class="key" onclick="handleNumber('3')">3</button>
+            <button class="key operator" onclick="handleOperator('+')">+</button>
+            <button class="key" onclick="handleNumber('0')">0</button>
+            <button class="key" onclick="handleNumber('.')">.</button>
+            <button class="key operator" onclick="handleOperator('=')">=</button>
+        </div>
+    </div>
+    <script>
+      const display = document.getElementById('display');
+let operator = null;
+let operand1 = null;
+let operand2 = null;
+let result = null;
+
+function handleNumber(number) {
+  if (result !== null) {
+    operand1 = result;
+    result = null;
+  }
+  if (operator === null) {
+    operand1 = operand1 === null ? number : operand1 + number;
+    display.value = operand1;
+  } else {
+    operand2 = operand2 === null ? number : operand2 + number;
+    display.value = operand1 + operator + operand2;
+  }
+}
+
+function handleOperator(op) {
+  switch (op) {
+    case 'clear':
+      operator = null;
+      operand1 = null;
+      operand2 = null;
+      result = null;
+      display.value = '';
+      break;
+    case 'backspace':
+      if (result !== null) {
+        result = null;
+        display.value = operand1;
+      } else if (operand2 !== null) {
+        operand2 = operand2.slice(0, -1);
+        display.value = operand1 + operator + operand2;
+      } else if (operator !== null) {
+        operator = null;
+        display.value = operand1;
+      } else {
+        operand1 = operand1.slice(0, -1);
+        display.value = operand1;
+      }
+      break;
+    case '%':
+      if (result !== null) {
+        operand1 = result;
+        result = null;
+      }
+      if (operand2 !== null) {
+        operand2 = parseFloat(operand2) / 100 * parseFloat(operand1);
+        display.value = operand1 + operator + operand2;
+      } else {
+        operand1 = parseFloat(operand1) / 100;
+        display.value = operand1;
+      }
+      break;
+    case '/':
+    case '*':
+    case '-':
+    case '+':
+      if (operand1 !== null && operand2 !== null) {
+        calculateResult();
+      }
+      operator = op;
+      display.value = operand1 + operator;
+      break;
+    case '=':
+      if (operand1 !== null && operator !== null && operand2 !== null) {
+        calculateResult();
+        operator = null;
+        operand2 = null;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+function calculateResult() {
+  switch (operator) {
+    case '/':
+      result = parseFloat(operand1) / parseFloat(operand2);
+      break;
+    case '*':
+      result = parseFloat(operand1) * parseFloat(operand2);
+      break;
+    case '-':
+      result = parseFloat(operand1) - parseFloat(operand2);
+      break;
+    case '+':
+      result = parseFloat(operand1) + parseFloat(operand2);
+      break;
+    default:
+      break;
+  }
+  display.value = result;
+}
+
+
+    </script>
+    <script src="../javascript/calc.js"></script>
+</body>
+</html>
